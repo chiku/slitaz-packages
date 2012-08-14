@@ -1,0 +1,63 @@
+# SliTaz package receipt.
+
+PACKAGE="freetype-infinality"
+VERSION="2.4.10"
+_pkgdate="20120615"
+_pkgrel="01"
+CATEGORY="x-window"
+SHORT_DESC="Freetype font engine with infinality patch."
+MAINTAINER="chirantan.mitra@gmail.com"
+TARBALL="freetype-$VERSION.tar.bz2"
+WEB_SITE="http://www.infinality.net/blog/infinality-freetype-patches/"
+WGET_URL="http://download.savannah.gnu.org/releases/freetype/$TARBALL"
+DEPENDS="zlib"
+PROVIDE="freetype"
+
+# Rules to configure and make the package.
+compile_rules()
+{
+	cd $src
+	patch_file="${PACKAGE}-${VERSION}-${_pkgdate}_${_pkgrel}-i386.tar.bz2"
+	wget "http://www.infinality.net/fedora/linux/zips/${patch_file}" &&
+	tar -xf $patch_file &&
+	cat *.patch | patch -Np1 &&
+	./configure \
+		--sysconfdir=/etc \
+		--prefix=/usr \
+		--mandir=/usr/share/man \
+		$CONFIGURE_ARGS &&
+	make &&
+	make DESTDIR=$DESTDIR install
+}
+
+# Rules to gen a SliTaz package suitable for Tazpkg.
+genpkg_rules()
+{
+	mkdir -p $fs/usr/lib
+	mkdir -p $fs/etc
+	cp -a $install/usr/bin $fs/usr
+	cp -a $install/usr/lib/*.so* $fs/usr/lib
+	cp -a $src/infinality-settings.sh $fs/etc/infinality-settings.sh
+}
+
+# Pre and post install commands for Tazpkg.
+pre_install()
+{
+	echo "Processing pre-install commands..."
+}
+post_install()
+{
+	echo "Processing post-install commands..."
+	echo "Please source /etc/infinality-settings.sh from your shell profile" 
+}
+
+# Pre and post remove commands for Tazpkg.
+pre_remove()
+{
+	echo "Processing pre-remove commands..."
+}
+post_remove()
+{
+	echo "Processing post-remove commands..."
+	echo "Please unreference /etc/infinality-settings.sh in your shell profile" 
+}
